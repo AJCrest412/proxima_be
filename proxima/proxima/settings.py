@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,14 +20,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-hojp9@d9m57l=mkx^1ch*u%hmr*05s*3wp-@&4a7b2dd0td5_h'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.app']
-# DEBUG = False
 # ALLOWED_HOSTS = ['yourdomain.com', 'www.yourdomain.com']
 
 # Application definition
@@ -90,12 +88,12 @@ WSGI_APPLICATION = 'proxima.wsgi.application'
 # }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',   # or 'django.db.backends.postgresql'
-        'NAME': 'u120995634_proxima',
-        'USER': 'u120995634_pruthvi',
-        'PASSWORD': 'proxima@12345',
-        'HOST': 'mysql.hostinger.com',
-        'PORT': '3306',  # 5432 for PostgreSQL
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT', cast=int),
     }
 }
 
