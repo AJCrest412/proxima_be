@@ -24,8 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.app']
-# ALLOWED_HOSTS = ['yourdomain.com', 'www.yourdomain.com']
+# ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.app']
+# ALLOWED_HOSTS = [
+#     'selection.proximabeyonddecor.in',
+#     'www.selection.proximabeyonddecor.in'
+# ]
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -161,3 +165,5 @@ SIMPLE_JWT = {
     'SIGNING_KEY': SECRET_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
