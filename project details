@@ -1,0 +1,79 @@
+Models :-
+
+User — the owner who logs in (custom user with email).
+
+Client — buyer information (saved only when a sale is confirmed and client details are added).
+
+Sale — a diary entry / session for a visit.
+
+status: "draft" while you are adding items, "confirmed" after you add client details, "cancelled" if the visit was cancelled.
+
+created_by: owner (User).
+
+SaleItem — each product line inside a Sale.
+
+Product details are entered manually (no separate product table).
+
+Contains fields: category, room (optional text), product_name, product_code, size_finish, mrp, discount_type (percent or amount), discount_value, price_per_piece, total_amount, quantity.
+
+price_per_piece and total_amount are calculated automatically on save from mrp, discount_type, discount_value, quantity.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Workflow:-
+
+Owner logs in using email + password (JWT).
+
+Owner creates a Sale (default status='draft'), then adds multiple SaleItem records to that sale while client selects items.
+
+Owner totals and adjusts discounts as needed (discounts are stored per item).
+
+When client confirms purchase:
+
+Owner creates a Client (with name / phone / address / architect fields).
+
+Owner sets sale.client = that client and updates sale.status = 'confirmed'.
+
+If client cancels, owner can set sale.status = 'cancelled' (or delete — but default is to keep cancelled for your diary/history).
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+API overview (endpoints you'll get)
+
+Authentication:
+
+POST /api/accounts/login/ → obtain JWT (access & refresh).
+
+Clients:
+
+GET /api/clients/ → list clients.
+
+POST /api/clients/ → create client. (But you will create clients when finalizing a sale.)
+
+Sales:
+
+GET /api/sales/ → list sales (filter by status if needed).
+
+POST /api/sales/ → create a new sale (creates a draft).
+
+GET /api/sales/{id}/ → retrieve sale with its items.
+
+PATCH /api/sales/{id}/ → update sale (e.g., mark status='cancelled' or attach client id to confirm).
+
+DELETE /api/sales/{id}/ → delete sale.
+
+Sale Items:
+
+POST /api/sales/{sale_id}/items/ → add a sale item (manual product details).
+
+GET /api/sales/{sale_id}/items/ → list items for a sale.
+
+PATCH/DELETE individual items via /api/sale-items/{id}/.
+
+Convenience:
+
+POST /api/sales/{id}/confirm/ → create client (or attach an existing client) and set sale status='confirmed' (I’ll add a simple confirm view).
+
+All endpoints require authentication (owner JWT).
+
+
