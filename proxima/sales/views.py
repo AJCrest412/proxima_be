@@ -17,7 +17,11 @@ class ClientViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         search = self.request.query_params.get('search')
         if search:
-            queryset = queryset.filter(name__icontains=search)
+            queryset = queryset.filter(
+                Q(name__icontains=search) |
+                Q(phone__icontains=search) |
+                Q(arc_name__icontains=search)
+            )
         return queryset
     
     def list(self, request, *args, **kwargs):
