@@ -30,7 +30,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 #     'www.selection.proximabeyonddecor.in'
 # ]
 ALLOWED_HOSTS = ['*']
-
+CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
 
 INSTALLED_APPS = [
