@@ -98,3 +98,62 @@ class SaleSerializer(serializers.ModelSerializer):
         
         return instance
 
+class SaleWithClientUpdateSerializer(serializers.ModelSerializer):
+    """
+    Simple serializer for updating sale with client and items data.
+    Pass client_id and client data to update client, pass items data to update items.
+    """
+    items = SaleItemSerializer(many=True, required=False)
+    client = ClientSerializer(read_only=True)
+    client_id = serializers.PrimaryKeyRelatedField(
+        queryset=Client.objects.all(), write_only=True, required=False
+    )
+    client_data = ClientSerializer(write_only=True, required=False)
+    total_amount = serializers.DecimalField(max_digits=14, decimal_places=2, read_only=True)
+    created_by = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Sale
+        fields = ['id', 'created_by', 'client', 'status', 'created_at', 'items', 'total_amount', 'client_id', 'client_data']
+        read_only_fields = ['created_by', 'created_at', 'total_amount']
+
+    def update(self, instance, validated_data):
+        # Extract client data and items data
+        client_data = validated_data.pop('client_data', None)
+        items_data = validated_data.pop('items', None)
+        client_id = validated_data.pop('client_id', None)
+        
+        # Update sale fields (status, etc.)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        # Handle client assignment/update
+        if client_id:
+            # Assign existing client
+            instance.client = client_id
+        
+        if client_data:
+            print(client_data)
+            # Update or create client
+            if instance.client:
+                # Update existing client
+                client_serializer = ClientSerializer(instance.client, data=client_data, partial=True)
+                client_serializer.is_valid(raise_exception=True)
+                client_serializer.save()
+            else:
+                # Create new client
+                client_serializer = ClientSerializer(data=client_data)
+                client_serializer.is_valid(raise_exception=True)
+                instance.client = client_serializer.save()
+        
+        # Update items if items data is provided
+        if items_data is not None:
+            # Delete existing items
+            instance.items.all().delete()
+            # Create new items
+            for item_data in items_data:
+                SaleItem.objects.create(sale=instance, **item_data)
+        
+        instance.save()
+        return instance
+

@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Client, Sale, SaleItem
-from .serializers import ClientSerializer, SaleSerializer, SaleItemSerializer
+from .serializers import ClientSerializer, SaleSerializer, SaleItemSerializer, SaleWithClientUpdateSerializer
 from rest_framework.views import APIView
 from django.db.models import Q
 from .pagination import CustomPagination
@@ -170,6 +170,45 @@ class SaleViewSet(viewsets.ModelViewSet):
         items.delete()
 
         return Response({"success" : True, "message": f"{count} item(s) removed from the sale."}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['put', 'patch'])
+    def update_with_client(self, request, pk=None):
+        """
+        Simple API to update sale with client and items data.
+        
+        Pass:
+        - client_id: to assign existing client
+        - client_data: {client data} to update/create client
+        - items: [{item data}] to update items
+        - status: to update sale status
+        
+        Example:
+        {
+            "client_id": 5,
+            "client_data": {"name": "Updated Name", "phone": "1234567890"},
+            "items": [{"product_name": "Product 1", "quantity": 2, "mrp": "100.00"}],
+            "status": "confirmed"
+        }
+        """
+        sale = self.get_object()
+        
+        # Check if sale can be modified
+        if sale.status == 'cancelled':
+            return Response({
+                "success": False, 
+                "message": "Cannot modify a cancelled sale."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Use the serializer for updating
+        serializer = SaleWithClientUpdateSerializer(sale, data=request.data, partial=request.method == 'PATCH')
+        serializer.is_valid(raise_exception=True)
+        updated_sale = serializer.save()
+
+        return Response({
+            "success": True,
+            "message": "Sale updated successfully.",
+            "data": SaleSerializer(updated_sale).data
+        }, status=status.HTTP_200_OK)
 
 class SaleItemChoicesView(APIView):
 
