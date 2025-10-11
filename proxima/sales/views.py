@@ -20,7 +20,8 @@ class ClientViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(
                 Q(name__icontains=search) |
                 Q(phone__icontains=search) |
-                Q(arc_name__icontains=search)
+                Q(arc_name__icontains=search) |
+                Q(attend_by__icontains=search)
             )
         return queryset
     

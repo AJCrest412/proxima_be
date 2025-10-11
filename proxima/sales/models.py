@@ -7,6 +7,7 @@ class Client(models.Model):
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=20, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
+    attend_by = models.CharField(max_length=255, blank=True, null=True)
     arc_name = models.CharField(max_length=255, blank=True, null=True)
     arc_phone = models.CharField(max_length=20, blank=True, null=True)
     arc_address = models.TextField(blank=True, null=True)
